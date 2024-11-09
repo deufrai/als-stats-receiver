@@ -10,21 +10,24 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("0.0.0.0", udp_port))
 print(f"Listening on UDP/{udp_port}")
 
-with connector.connect(host="localhost", user="als-use", password=os.getenv('ALS_USE_PWD'), database="als-use") as db:
-    print(f"Connected to DB. Keep'em comin' !")
-    messages_template = r"^(.+?)\|\|(.+?)\|\|(.+?)$"
+messages_template = r"^(.+?)\|\|(.+?)\|\|(.+?)$"
+db_password = os.getenv('ALS_USE_PWD')
 
-    while True:
-        data, _ = sock.recvfrom(1024)
-        message = data.decode().strip()
-        match = re.match(messages_template, message)
+while True:
+    data, _ = sock.recvfrom(1024)
+    message = data.decode().strip()
+    match = re.match(messages_template, message)
 
-        if not match:
-            print(f'Received invalid message: "{message}" !!!')
-            continue
+    if not match:
+        print(f'Received invalid message: "{message}" !!!')
+        continue
 
-        print(f'Received message: "{message}"')
+    print(f'Received message: "{message}"')
 
+    with connector.connect(host="localhost",
+                           user="als-use",
+                           password=db_password,
+                           database="als-use") as db:
         version = match.group(1)
         architecture = match.group(2)
         os = match.group(3)
