@@ -15,7 +15,13 @@ db_password = os.getenv('ALS_USE_PWD')
 
 while True:
     data, _ = sock.recvfrom(1024)
-    message = data.decode().strip()
+
+    try:
+        message = data.decode().strip()
+    except UnicodeDecodeError:
+        print("Invalid Unicode data received. IGNORED")
+        continue
+
     match = re.match(messages_template, message)
 
     if not match:
